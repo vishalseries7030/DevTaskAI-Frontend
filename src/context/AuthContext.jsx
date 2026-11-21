@@ -8,7 +8,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in
     const storedUser = authService.getStoredUser();
     if (storedUser) {
       setUser(storedUser);
@@ -33,6 +32,24 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  // Called by AuthCallback page after OAuth redirect
+  const handleOAuthCallback = (token, userData) => {
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);
+  };
+
+  // Redirect to backend OAuth routes
+  const loginWithGoogle = () => {
+    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:5000';
+    window.location.href = `${backendUrl}/api/v1/auth/google`;
+  };
+
+  const loginWithGithub = () => {
+    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:5000';
+    window.location.href = `${backendUrl}/api/v1/auth/github`;
+  };
+
   const value = {
     user,
     login,
@@ -40,6 +57,9 @@ export const AuthProvider = ({ children }) => {
     logout,
     loading,
     isAuthenticated: !!user,
+    handleOAuthCallback,
+    loginWithGoogle,
+    loginWithGithub,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
